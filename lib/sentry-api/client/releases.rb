@@ -70,6 +70,25 @@ class SentryApi::Client
       put("/projects/#{@default_org_slug}/#{project_slug}/releases/#{version}/", body: options)
     end
 
+    # Upload a new file for the given release
+    # Unlike other API requests, files must be uploaded using the traditional multipart/form-data content-type.
+    # The optional ‘name’ attribute should reflect the absolute path that this file will be referenced as. For example, in the case of JavaScript you might specify the full web URI.
+    #
+    # @example
+    #   SentryApi.upload_file('project-slug', { version: '1.0', ref:'6ba09a7c53235ee8a8fa5ee4c1ca8ca886e7fdbb'})
+    #
+    # @param project_slug [String] the slug of the project the client keys belong to.
+    # @param version [String] the version identifier of the release.
+    # @option file_path [String] the absolute file path of the file.
+    # @param [Hash] options A customizable set of options.
+    # @option options [String] :name the name (full path) of the file.
+    # @option options [String] :dist the name of the dist.
+    # @option options [String] :header this parameter can be supplied multiple
+    #    times to attach headers to the file. Each header is a string in the
+    #    format key:value. For instance it can be used to define a content type.
+    # @return <SentryApi::ObjectifiedHash>
+    def upload_file(project_slug, version, file_path, options={})
+      upload("/organizations/#{@default_org_slug}/releases/#{version}/files/", body: { file: File.new(file_path) }.merge(options))
+    end
   end
-
 end
